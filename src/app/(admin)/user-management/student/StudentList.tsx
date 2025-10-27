@@ -232,6 +232,15 @@ const StudentList: React.FC = () => {
       ),
       width: 200,
     },
+    {
+      title: "Sdt", // School
+      dataIndex: "studentProfile",
+      key: "phoneNumber",
+      render: (value: any) => (
+        <div className="text-lg">{value?.phoneNumber || "Không có"}</div>
+      ),
+      width: 200,
+    },
     // {
     //   title: "Địa chỉ", // Address
     //   dataIndex: "studentProfile",
@@ -439,6 +448,8 @@ const StudentList: React.FC = () => {
                 schoolName: allSchools?.find((sch: { value: number }) => sch.value === value.school)?.label|| "",
                 studentId: currentStudentId,
                 birthDay: value.birthDay ? value.birthDay.format("YYYY-MM-DD") : null,
+                email: value.email,
+                phonNumber: value.phoneNumber,
               });
             }}
           >
@@ -452,20 +463,31 @@ const StudentList: React.FC = () => {
               <Input placeholder="Nhập tên học sinh" />
             </Form.Item>
             <Form.Item
-              name="classroom"
-              label="Lớp"
+              name="email"
+              label="email"
               className="mb-2"
               required
-              rules={[{ required: true, message: "Lớp không được bỏ trống" }]}
+              rules={
+                [
+                  { required: true, message: "Email không được bỏ trống" },
+                  { type: "email", message: "Định dạng email không hợp lệ" },
+                ]}
             >
-                <Select
-                  options={allClasses || []}
-                  placeholder="Lựa chọn lớp"
-                  loading={isFetchingClasses}
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                />
+              <Input placeholder="Nhập email của phụ huynh" />
+            </Form.Item>
+            <Form.Item
+              name="phoneNumber"
+              label="Số điện thoại"
+              className="mb-2"
+              required
+              rules={[validateRequireInput("Số điện thoại không được bỏ trống"),
+                {
+                  pattern: /^(0)[0-9]{9}$/,
+                  message: "Số điện thoại không hợp lệ (phải có 10 số và bắt đầu bằng 0)",
+                },
+              ]}
+            >
+              <Input placeholder="Nhập số điện thoại Phụ huynh" />
             </Form.Item>
             <Form.Item
               name="school"
@@ -483,6 +505,35 @@ const StudentList: React.FC = () => {
                   optionFilterProp="label"
                 />
             </Form.Item>
+            {/* lớp chỉ hiển thị sau khi chọn trường */}
+            <Form.Item
+              noStyle
+              shouldUpdate={(prev, current) => prev.school !== current.school}
+            >
+              {({ getFieldValue }) =>
+                getFieldValue("school") ? (
+                  <Form.Item
+                    name="classroom"
+                    label="Lớp"
+                    className="mb-2"
+                    required
+                    rules={[{ required: true, message: "Lớp không được bỏ trống" }]}
+                  >
+                      <Select
+                        options={allClasses || []}
+                        placeholder="Lựa chọn lớp"
+                        loading={isFetchingClasses}
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
+                      />
+                  </Form.Item>
+                ) : null
+              }
+            </Form.Item>
+
+            
+            
             {/* <Form.Item
               name="birthDay"
               label="Ngày sinh"

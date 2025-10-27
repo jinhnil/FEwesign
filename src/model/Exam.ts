@@ -2,11 +2,16 @@
 import { Base } from "./Base";
 
 class Exam extends Base {
+  constructor() {
+    super("learning-service");
+  }
   // Danh sách bài kiểm tra
   getLstExam = async (param?: any) => {
     const res = await this.apiGetWithoutPrefixNode(`/exam/all-exams`, param); 
     return res;
   };
+
+
 
     getListPracticeExam = async (param?: any, teacherId?: number ) => {
     try {
@@ -123,4 +128,4 @@ class Exam extends Base {
   };
 }
 
-export default new Exam("learning-service");
+export default new Exam();

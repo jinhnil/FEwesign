@@ -3,6 +3,10 @@ import { Base } from "./Base";
 import axios from "axios";
 
 class Learning extends Base {
+
+  constructor() {
+    super("learning-service");
+  }
   // Danh sách topic
   getAllTopics = async (params?: any) => {
     const res = await this.apiGet("/topics/all", params);
@@ -182,6 +186,11 @@ class Learning extends Base {
     const res = await this.apiGetWithoutPrefixNode(`/user/school-list`, params);
     return res.data;
   };
+
+  getListSchools = async (params?: any) => {
+    const res = await this.apiGet(`/schools/all`, params);
+    return res.data;
+  }
   
   // Thêm mới lớp
   createClass = async (body?: any) => {
@@ -367,4 +376,5 @@ class Learning extends Base {
   };
 }
 
-export default new Learning("learning-service");
+export default new Learning();
+

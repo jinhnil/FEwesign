@@ -2,6 +2,9 @@
 import { Base } from "./Base";
 
 class MediaModel extends Base {
+  constructor(){  
+    super("learning-service");
+  }
   // sét primary
   setPrimaryVideoVocabulary = async (body: any) => {
     const res = await this.apiPut("/vocabulary-videos/set-primary", body);
@@ -75,4 +78,4 @@ class MediaModel extends Base {
   };
 }
 
-export default new MediaModel("learning-service");
+export default new MediaModel();

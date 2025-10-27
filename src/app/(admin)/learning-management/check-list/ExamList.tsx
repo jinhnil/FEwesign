@@ -6,7 +6,7 @@ import Exam from "@/model/Exam";
 import Learning from "@/model/Learning";
 import { DeleteOutlined, EditFilled, MoreOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Dropdown, Input, Select, Table, message } from "antd";
+import { Button, Dropdown, Input, Select, Table, message, Modal } from "antd";
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import styled from "styled-components";
@@ -113,6 +113,29 @@ const ExamListPage = ({ isPrivate }: any) => {
     },
   });
 
+  // Xác nhận xóa bài kiểm tra
+  const handleDelete = (itemValue: any) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa câu hỏi',
+            content: 'Bạn có chắc chắn muốn xóa câu hỏi này không? Thao tác này không thể hoàn tác.',
+            okText: 'Xóa',
+            okType: 'danger', // Hiển thị nút Xóa màu đỏ
+            cancelText: 'Hủy',
+            
+            // Logic xảy ra khi người dùng bấm 'Xóa'
+            onOk() {
+                // Gọi hàm mutate để thực hiện xóa
+                mutationDeleteUser.mutate(itemValue); 
+            },
+            
+            // Logic xảy ra khi người dùng bấm 'Hủy' hoặc đóng hộp thoại
+            onCancel() {
+                // Có thể thêm message thông báo hủy nếu cần
+                // message.info('Đã hủy thao tác xóa.');
+            },
+        });
+    };
+
     const handleTableChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -171,7 +194,7 @@ const ExamListPage = ({ isPrivate }: any) => {
             label: (
               <div
                 className="text-red600 flex items-center gap-x-3 py-[3px] text-red"
-                onClick={() => mutationDeleteUser.mutate(value)}
+                onClick={() => handleDelete(value)}
               >
                 <DeleteOutlined style={{ color: colors.red700 }} />
                 Xóa

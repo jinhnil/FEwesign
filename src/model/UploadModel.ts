@@ -2,6 +2,9 @@
 import { Base } from "./Base";
 
 class UploadModel extends Base {
+  constructor() {
+    super("data-collection-service");
+  }
   // upload
   uploadFile = async (body: FormData) => {
     const res = await this.apiUploadFile("/api/upload", body);
@@ -29,4 +32,4 @@ class UploadModel extends Base {
   // detact
 }
 
-export default new UploadModel("data-collection-service");
+export default new UploadModel();

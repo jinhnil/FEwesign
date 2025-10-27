@@ -52,9 +52,9 @@ const DashboardApp: React.FC = () => {
   //   nameSearch: "",
   // });
   const { data: examData, isFetching: isFetchingExam } = useQuery({
-  queryKey: ["getLstExam"],
+  queryKey: ["getLstExamOfUser"],
   queryFn: async () => {
-    const res = await Exam.getLstExam({ classRoomId: 0, nameSearch: "" });
+    const res = await Exam.getLstExamUser({ classRoomId: 0, nameSearch: "" });
     return res?.data;
   },
 });

@@ -2,6 +2,9 @@
 import { Base } from "./Base";
 
 class Questions extends Base {
+  constructor() {
+    super("learning-service");
+  }
   // Danh sách câu hỏi
   getAllQuestion = async (params: any) => {
     const res = await this.apiGetWithoutPrefixNode(`/question/all`, params);
@@ -69,4 +72,4 @@ class Questions extends Base {
   };
 }
 
-export default new Questions("learning-service");
+export default new Questions();

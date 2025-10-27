@@ -2,6 +2,9 @@
 import { Base } from "./Base";
 
 class Lesson extends Base {
+  constructor() {
+    super("learning-service");
+  }
   // Danh sách bài học
   getLstLessonByClass = async (body?: any) => {
     const res = await this.apiGet("/lessons/all", body);
@@ -29,4 +32,4 @@ class Lesson extends Base {
   };
 }
 
-export default new Lesson("learning-service");
+export default new Lesson();

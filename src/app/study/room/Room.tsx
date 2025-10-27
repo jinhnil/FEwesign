@@ -109,7 +109,7 @@ const Rooms: FC<SectionHero2Props> = ({ className = "" }) => {
     enabled: !!showModal.classRoomId,
   });
 
-  console.log("allLesson", allLesson);
+  //console.log("allLesson", allLesson);
 
   // API lấy danh sách từ theo topics
   const { data: allVocabulary, isFetching: isFetchingVocabulary } = useQuery({

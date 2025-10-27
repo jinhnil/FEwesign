@@ -2,6 +2,9 @@
 import { Base } from "./Base";
 
 class User extends Base {
+  constructor() {
+    super("user-service");
+  }
   // thông tin cá nhân
   getProfile = async () => {
     const res = await this.apiGet("/users/me/v2");
@@ -132,4 +135,4 @@ class User extends Base {
   };
 }
 
-export default new User("user-service");
+export default  new User();

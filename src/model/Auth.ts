@@ -2,6 +2,9 @@
 import { Base } from "./Base";
 
 class Auth extends Base {
+  constructor() {
+    super("user-service");
+  }
   // Đăng nhập
   login = async (body?: any) => {
     const res = await this.apiPost("/auth/login", body);
@@ -18,4 +21,4 @@ class Auth extends Base {
   };
 }
 
-export default new Auth("user-service");
+export default new Auth();

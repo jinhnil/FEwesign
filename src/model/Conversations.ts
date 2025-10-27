@@ -2,6 +2,9 @@
 import { Base } from "./Base";
 
 class Conversations extends Base {
+  constructor() {
+    super("service-chat");
+  }
   // Thông tin cá nhân
   getConversations = async () => {
     const res = await this.apiGet("/conversations/all-me");
@@ -25,4 +28,4 @@ class Conversations extends Base {
   };
 }
 
-export default new Conversations("service-chat");
+export default new Conversations();
