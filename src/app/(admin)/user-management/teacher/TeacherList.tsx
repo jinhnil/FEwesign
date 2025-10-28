@@ -7,7 +7,7 @@ import Learning from "@/model/Learning";
 import { validateRequireInput } from "@/utils/validation/validtor";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, Form, Input, Select, message, DatePicker } from "antd";
+import { Button, Form, Input, Select, message, DatePicker, Modal } from "antd";
 import { useForm } from "antd/es/form/Form";
 import React, { useCallback, useState } from "react";
 import { CustomTable } from "../../learning-management/check-list/ExamList";
@@ -16,7 +16,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import User from "@/model/User";
 import Auth from "@/model/Auth";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 interface Teacher {
   name: string;
   classroom: any;
@@ -78,7 +78,13 @@ const TeacherList: React.FC = () => {
   // Fetching the list of teachers
   const [total, setTotal] = useState<number>(0);
   const { isFetching, refetch } = useQuery({
-    queryKey: ["getListTeachers", searchText, selectedClass, selectedSchool, currentPage],
+    queryKey: [
+      "getListTeachers",
+      searchText,
+      selectedClass,
+      selectedSchool,
+      currentPage,
+    ],
     queryFn: async () => {
       const res = await User.teacherList({
         name: searchText,
@@ -87,7 +93,7 @@ const TeacherList: React.FC = () => {
         page: currentPage - 1,
         take: pageSize,
         orderBy: "userId",
-        sortBy: "DESC"
+        sortBy: "DESC",
       });
       setTotal(res.meta.itemCount);
       // Tạo lại dữ liệu với cấu trúc phù hợp
@@ -98,9 +104,10 @@ const TeacherList: React.FC = () => {
         classroom: item.classRoomName,
         teacherProfile: {
           // Giả sử các thông tin về giáo viên, nếu có
-          birthDay: item.birthDay && dayjs(item.birthDay).isValid()
-            ? dayjs(item.birthDay).add(0, 'day').format('YYYY-MM-DD')
-            : "Không có",
+          birthDay:
+            item.birthDay && dayjs(item.birthDay).isValid()
+              ? dayjs(item.birthDay).add(0, "day").format("YYYY-MM-DD")
+              : "Không có",
           schoolId: item.schoolId || "Không có",
           schoolName: item.schoolName || "Không có",
           address: item.city || "Không có",
@@ -134,9 +141,13 @@ const TeacherList: React.FC = () => {
       const updatedTeacher = {
         ...variables,
         name: variables.name,
-        classroom: allClasses?.find((cls: { value: any; }) => cls.value === variables.classroom)?.label,
+        classroom: allClasses?.find(
+          (cls: { value: any }) => cls.value === variables.classroom,
+        )?.label,
         teacherProfile: {
-          schoolName: allSchools?.find((sch: { value: any; }) => sch.value === variables.school)?.label,
+          schoolName: allSchools?.find(
+            (sch: { value: any }) => sch.value === variables.school,
+          )?.label,
           birthDay: variables.birthDay || "Không có",
           address: variables.address || "Không có",
           // email: `${variables.name.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
@@ -147,15 +158,19 @@ const TeacherList: React.FC = () => {
         modalCreate.typeModal === "create"
           ? [...prevLst, updatedTeacher]
           : prevLst.map((teacher) =>
-            teacher.teacherId === updatedTeacher.teacherId ? updatedTeacher : teacher,
-          ),
+              teacher.teacherId === updatedTeacher.teacherId
+                ? updatedTeacher
+                : teacher,
+            ),
       );
       setFilteredLstTeachers((prevLst) =>
         modalCreate.typeModal === "create"
           ? [...prevLst, updatedTeacher]
           : prevLst.map((teacher) =>
-            teacher.teacherId === updatedTeacher.teacherId ? updatedTeacher : teacher,
-          ),
+              teacher.teacherId === updatedTeacher.teacherId
+                ? updatedTeacher
+                : teacher,
+            ),
       );
 
       message.success(
@@ -169,6 +184,33 @@ const TeacherList: React.FC = () => {
       message.error(error?.data?.message);
     },
   });
+
+  const handleDeleteTeacher = (record: Teacher) => {
+    Modal.confirm({
+      title: "Xác nhận xoá giáo viên",
+      content: "Bạn có chắc chắn muốn xoá giáo viên này không?",
+      okText: "Xoá",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await User.deleteUser(record.teacherId); // record.id là id của học sinh
+          // Nếu thành công thì mới cập nhật lại danh sách ở FE
+          setLstTeachers((prev) =>
+            prev.filter((teacher) => teacher.teacherId !== record.teacherId),
+          );
+          setFilteredLstTeachers((prev) =>
+            prev.filter((teacher) => teacher.teacherId !== record.teacherId),
+          );
+
+          message.success("Xóa giáo viên thành công");
+        } catch (error) {
+          console.error(error);
+          message.error("Xóa giáo viên thất bại");
+        }
+      },
+    });
+  };
 
   const columns = [
     {
@@ -244,52 +286,48 @@ const TeacherList: React.FC = () => {
     },
     user?.role === "ADMIN"
       ? {
-        title: "Hành động", // Actions
-        key: "actions",
-        render: (_: any, record: Teacher) => (
-          <div className="flex space-x-2">
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setCurrentTeacherId(record.teacherId);
-                // const birthDay = record.teacherProfile.birthDay && 
-                //                   record.teacherProfile.birthDay !== "Không có" ? 
-                //                   dayjs(record.teacherProfile.birthDay) : null;
-                form.setFieldsValue({
-                  name: record.name,
-                  classroom: record.classRoomId || allClasses?.find((c: { label: any; }) => c.label === record.classroom)?.value,
-                  school: allSchools?.find((s: { label: any; }) => s.label === record.teacherProfile.schoolName)?.value,
-                  // birthDay: birthDay,
-                  // address: record.teacherProfile.address || "Không có",
-                  teacherId: record.teacherId,
-                });
-                setModalCreate({
-                  open: true,
-                  typeModal: "edit",
-                });
-              }}
-            />
-            <Button
-              icon={<DeleteOutlined />}
-              danger
-              onClick={async () => {
-                try {
-                  await User.deleteUser(record.teacherId); // record.id là id của học sinh
-
-                  // Nếu thành công thì mới cập nhật lại danh sách ở FE
-                  setLstTeachers((prev) => prev.filter((teacher) => teacher.teacherId !== record.teacherId));
-                  setFilteredLstTeachers((prev) => prev.filter((teacher) => teacher.teacherId !== record.teacherId));
-
-                  message.success("Xóa giáo viên thành công");
-                } catch (error) {
-                  console.error(error);
-                  message.error("Xóa giáo viên thất bại");
-                }
-              }}
-            />
-          </div>
-        ),
-      }
+          title: "Hành động", // Actions
+          key: "actions",
+          render: (_: any, record: Teacher) => (
+            <div className="flex space-x-2">
+              <Button
+                icon={<EditOutlined />}
+                onClick={() => {
+                  setCurrentTeacherId(record.teacherId);
+                  // const birthDay = record.teacherProfile.birthDay &&
+                  //                   record.teacherProfile.birthDay !== "Không có" ?
+                  //                   dayjs(record.teacherProfile.birthDay) : null;
+                  form.setFieldsValue({
+                    name: record.name,
+                    classroom:
+                      record.classRoomId ||
+                      allClasses?.find(
+                        (c: { label: any }) => c.label === record.classroom,
+                      )?.value,
+                    school: allSchools?.find(
+                      (s: { label: any }) =>
+                        s.label === record.teacherProfile.schoolName,
+                    )?.value,
+                    // birthDay: birthDay,
+                    // address: record.teacherProfile.address || "Không có",
+                    teacherId: record.teacherId,
+                  });
+                  setModalCreate({
+                    open: true,
+                    typeModal: "edit",
+                  });
+                }}
+              />
+              <Button
+                icon={<DeleteOutlined />}
+                danger
+                onClick={async () => {
+                  handleDeleteTeacher(record);
+                }}
+              />
+            </div>
+          ),
+        }
       : null,
   ]?.filter((item) => item);
 
@@ -416,11 +454,19 @@ const TeacherList: React.FC = () => {
               mutationCreateUpdate.mutate({
                 ...value,
                 classroom: value.classroom,
-                classRoomName: allClasses?.find((cls: { value: number }) => cls.value === value.classroom)?.label || "",
+                classRoomName:
+                  allClasses?.find(
+                    (cls: { value: number }) => cls.value === value.classroom,
+                  )?.label || "",
                 school: value.school,
-                schoolName: allSchools?.find((sch: { value: number }) => sch.value === value.school)?.label || "",
+                schoolName:
+                  allSchools?.find(
+                    (sch: { value: number }) => sch.value === value.school,
+                  )?.label || "",
                 teacherId: currentTeacherId,
-                birthDay: value.birthDay ? value.birthDay.format("YYYY-MM-DD") : null,
+                birthDay: value.birthDay
+                  ? value.birthDay.format("YYYY-MM-DD")
+                  : null,
                 email: value.email,
                 phonNumber: value.phoneNumber,
               });
@@ -431,7 +477,9 @@ const TeacherList: React.FC = () => {
               label="Tên giáo viên"
               className="mb-2"
               required
-              rules={[validateRequireInput("Tên giáo viên không được bỏ trống")]}
+              rules={[
+                validateRequireInput("Tên giáo viên không được bỏ trống"),
+              ]}
             >
               <Input placeholder="Nhập tên giáo viên" />
             </Form.Item>
@@ -440,11 +488,13 @@ const TeacherList: React.FC = () => {
               label="Email"
               className="mb-2"
               required
-              rules={
-                [
-                    { required: true, message: "Email giáo viên không được bỏ trống" },
-                    { type: "email", message: "Định dạng email không hợp lệ" },
-                ]}
+              rules={[
+                {
+                  required: true,
+                  message: "Email giáo viên không được bỏ trống",
+                },
+                { type: "email", message: "Định dạng email không hợp lệ" },
+              ]}
             >
               <Input placeholder="Nhập email giáo viên" />
             </Form.Item>
@@ -453,12 +503,16 @@ const TeacherList: React.FC = () => {
               label="Số điện thoại"
               className="mb-2"
               required
-              rules={[validateRequireInput("Số điện thoại giáo viên không được bỏ trống"),
-                  {
+              rules={[
+                validateRequireInput(
+                  "Số điện thoại giáo viên không được bỏ trống",
+                ),
+                {
                   pattern: /^(0)[0-9]{9}$/,
-                  message: "Số điện thoại không hợp lệ (phải có 10 số và bắt đầu bằng 0)",
-                  },
-                ]}
+                  message:
+                    "Số điện thoại không hợp lệ (phải có 10 số và bắt đầu bằng 0)",
+                },
+              ]}
             >
               <Input placeholder="Nhập số điện thoại giáo viên" />
             </Form.Item>
@@ -483,7 +537,9 @@ const TeacherList: React.FC = () => {
                     label="Lớp"
                     className="mb-2"
                     required
-                    rules={[{ required: true, message: "Lớp không được bỏ trống" }]}
+                    rules={[
+                      { required: true, message: "Lớp không được bỏ trống" },
+                    ]}
                   >
                     <Select
                       options={allClasses || []}
