@@ -119,6 +119,7 @@ const StudentList: React.FC = () => {
           schoolName: item.schoolName || "Không có",
           address: item.city || "Không có",
           email: item.email || "Không có",
+          phoneNumber: item.phoneNumber || "Không có",
         },
         classStudents: [item], // Mỗi bản ghi là một lớp học sinh tham gia
       }));
@@ -158,7 +159,8 @@ const StudentList: React.FC = () => {
           )?.label,
           birthDay: variables.birthDay || "Không có",
           address: variables.address || "Không có",
-          // email: `${variables.name.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
+          email: `${variables.name.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
+          phoneNumber: variables.phoneNumber || "Không có",
         },
       };
 
@@ -316,6 +318,8 @@ const StudentList: React.FC = () => {
                   form.setFieldsValue({
                     name: record.name,
                     // classroom: record.classroom,
+                    email: record.studentProfile.email || "",
+                    phoneNumber: record.studentProfile.phoneNumber || "",
                     classroom: allClasses?.find(
                       (c: { label: any }) => c.label === record.classroom,
                     )?.value,

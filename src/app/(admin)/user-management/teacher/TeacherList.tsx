@@ -112,6 +112,7 @@ const TeacherList: React.FC = () => {
           schoolName: item.schoolName || "Không có",
           address: item.city || "Không có",
           email: item.email || "Không có",
+          phoneNumber: item.phoneNumber || "Không có",
         },
         classTeachers: [item], // Mỗi bản ghi là một lớp giáo viên tham gia
       }));
@@ -150,7 +151,8 @@ const TeacherList: React.FC = () => {
           )?.label,
           birthDay: variables.birthDay || "Không có",
           address: variables.address || "Không có",
-          // email: `${variables.name.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
+          email: `${variables.name.toLowerCase().replace(/\s+/g, "")}@gmail.com`,
+          phoneNumber: variables.phoneNumber || "Không có",
         },
       };
 
@@ -299,6 +301,8 @@ const TeacherList: React.FC = () => {
                   //                   dayjs(record.teacherProfile.birthDay) : null;
                   form.setFieldsValue({
                     name: record.name,
+                    email: record.teacherProfile.email || "",
+                    phoneNumber: record.teacherProfile.phoneNumber || "",
                     classroom:
                       record.classRoomId ||
                       allClasses?.find(

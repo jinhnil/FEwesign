@@ -16,9 +16,15 @@ const GradingTest: React.FC = () => {
   const examId = params.examId;
   const userId = params.userId;
   const [loading, setLoading] = useState(false);
-  const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[]>([]);
-  const [visibleVideos, setVisibleVideos] = useState<{ [key: number]: boolean }>({});
-  const [gradingList, setGradingList] = useState<{ isCorrect: boolean | null }[]>([]);
+  const [practiceQuestions, setPracticeQuestions] = useState<
+    PracticeQuestion[]
+  >([]);
+  const [visibleVideos, setVisibleVideos] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [gradingList, setGradingList] = useState<
+    { isCorrect: boolean | null }[]
+  >([]);
   const VIDEO_BASE_URL = "http://202.191.56.11:8088/videos/";
   // const VIDEO_BASE_URL = "http://localhost:8088/videos/";
   // Lấy danh sách câu hỏi thực hành và kết quả AI detect
@@ -29,14 +35,16 @@ const GradingTest: React.FC = () => {
       .then((res) => {
         const list = res?.data;
         if (Array.isArray(list)) {
-          const filtered = list.filter((q: any) => Array.isArray(q.videos) && q.videos.length > 0);
+          const filtered = list.filter(
+            (q: any) => Array.isArray(q.videos) && q.videos.length > 0,
+          );
 
           setPracticeQuestions(
             filtered.map((q: any) => ({
               contentFromVocabulary: q.contentFromVocabulary,
               videoUrl: q.videos[0]?.videoUrl || "", // lấy video đầu tiên (có thể cập nhật nếu nhiều video)
               aiAnswer: q.videos[0]?.aiAnswer || "",
-            }))
+            })),
           );
 
           setGradingList(filtered.map(() => ({ isCorrect: null })));
@@ -52,12 +60,11 @@ const GradingTest: React.FC = () => {
   }, [examId, userId]);
 
   const toggleVideo = (index: number) => {
-  setVisibleVideos((prev) => ({
-    ...prev,
-    [index]: !prev[index],
-  }));
-};
-
+    setVisibleVideos((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   // Hàm tick đúng/sai
   const handleGradeChange = (index: number, value: boolean) => {
@@ -115,7 +122,11 @@ const GradingTest: React.FC = () => {
       width: 150,
       render: (videoUrl: string) =>
         videoUrl ? (
-          <a href={VIDEO_BASE_URL + videoUrl} target="_blank" rel="noopener noreferrer">
+          <a
+            href={VIDEO_BASE_URL + videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Xem video
           </a>
         ) : (
@@ -149,7 +160,9 @@ const GradingTest: React.FC = () => {
   return (
     <Spin spinning={loading}>
       <div className="p-6">
-        <h2 className="text-xl font-bold mb-4">Chấm điểm bài kiểm tra thực hành</h2>
+        <h2 className="mb-4 text-xl font-bold">
+          Chấm điểm bài kiểm tra thực hành
+        </h2>
         <Table
           columns={columns}
           dataSource={practiceQuestions.map((q, idx) => ({
@@ -159,8 +172,19 @@ const GradingTest: React.FC = () => {
           pagination={false}
           bordered
         />
-        <div className="flex justify-end mt-4">
-          <Button type="primary" onClick={handleSaveGrading} style={{background: "#2f54eb"}}>
+        <div className="mt-4 flex justify-end">
+          <Button
+            type="default"
+            onClick={handleSaveGrading}
+            style={{ background: "#d7d7d8ff", margin: "0 16px" }}
+          >
+            hủy
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleSaveGrading}
+            style={{ background: "#2f54eb" }}
+          >
             Lưu kết quả chấm điểm
           </Button>
         </div>
