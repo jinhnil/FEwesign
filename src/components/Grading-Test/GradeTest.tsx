@@ -176,7 +176,7 @@ const GradingTest: React.FC = () => {
           <Button
             type="default"
             onClick={handleSaveGrading}
-            style={{ background: "#d7d7d8ff", margin: "0 16px" }}
+            style={{ background: "#bebebeff", margin: "0 16px" }}
           >
             hủy
           </Button>
