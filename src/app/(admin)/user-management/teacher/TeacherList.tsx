@@ -261,7 +261,7 @@ const TeacherList: React.FC = () => {
     },
     {
       title: "Sdt", // School
-      dataIndex: "studentProfile",
+      dataIndex: "teacherProfile",
       key: "phoneNumber",
       render: (value: any) => (
         <div className="text-lg">{value?.phoneNumber || "Không có"}</div>
