@@ -100,6 +100,11 @@ const GradingTest: React.FC = () => {
     setLoading(false);
   };
 
+  //hủy và quay về trang trước
+  const handleCancel = () => {
+    router.push("/teacher-scoring-test");
+  };
+
   // Cột bảng
   const columns = [
     {
@@ -175,7 +180,7 @@ const GradingTest: React.FC = () => {
         <div className="mt-4 flex justify-end">
           <Button
             type="default"
-            onClick={handleSaveGrading}
+            onClick={handleCancel}
             style={{ background: "#bebebeff", margin: "0 16px" }}
           >
             hủy
