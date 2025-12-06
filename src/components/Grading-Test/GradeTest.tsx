@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Table, Button, Checkbox, Spin, message } from "antd";
+import { Table, Button, Checkbox, Spin, message, Modal } from "antd";
 import Exam from "@/model/Exam";
 import { useParams, useRouter } from "next/navigation";
 
@@ -25,6 +25,10 @@ const GradingTest: React.FC = () => {
   const [gradingList, setGradingList] = useState<
     { isCorrect: boolean | null }[]
   >([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string | undefined>(
+    undefined,
+  );
   const VIDEO_BASE_URL = "http://202.191.56.11:8088/videos/";
   // const VIDEO_BASE_URL = "http://localhost:8088/videos/";
   // Lấy danh sách câu hỏi thực hành và kết quả AI detect
@@ -64,6 +68,19 @@ const GradingTest: React.FC = () => {
       ...prev,
       [index]: !prev[index],
     }));
+  };
+
+  // Hàm hiển thị modal video
+  const showVideoModal = (videoUrl: string) => {
+    setCurrentVideoUrl(VIDEO_BASE_URL + videoUrl);
+    setIsModalVisible(true);
+  };
+
+  // Hàm đóng Modal
+  const handleVideoModalClose = () => {
+    // Quan trọng: Dừng video khi đóng modal
+    setCurrentVideoUrl(undefined);
+    setIsModalVisible(false);
   };
 
   // Hàm tick đúng/sai
@@ -127,13 +144,13 @@ const GradingTest: React.FC = () => {
       width: 150,
       render: (videoUrl: string) =>
         videoUrl ? (
-          <a
-            href={VIDEO_BASE_URL + videoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Button
+            onClick={() => showVideoModal(videoUrl)}
+            type="link"
+            style={{ padding: 0 }}
           >
             Xem video
-          </a>
+          </Button>
         ) : (
           <span>Chưa có</span>
         ),
@@ -194,6 +211,27 @@ const GradingTest: React.FC = () => {
           </Button>
         </div>
       </div>
+      {/* Modal hiển thị video */}
+      <Modal
+        title="Video Biểu Diễn Của Học Sinh"
+        open={isModalVisible} // Dùng 'open' thay cho 'visible' từ Antd v5
+        onCancel={handleVideoModalClose}
+        footer={null} // Ẩn footer
+        width={700}
+        centered
+      >
+        {currentVideoUrl && (
+          <video
+            controls
+            autoPlay // Tự động phát khi mở
+            width="100%"
+            key={currentVideoUrl} // key giúp reset video khi URL thay đổi
+          >
+            <source src={currentVideoUrl} type="video/mp4" />
+            Trình duyệt của bạn không hỗ trợ thẻ video.
+          </video>
+        )}
+      </Modal>
     </Spin>
   );
 };

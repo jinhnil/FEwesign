@@ -124,6 +124,13 @@ export const AdminSystem = (admin: any) => {
                 },
               ],
             },
+            {
+              key: "/learning-management/statistics",
+              label: "Thống kê học tập",
+              path: "/learning-management/statistics",
+              hidden: false,
+              icon: <DotIcon color="white" size={20} />,
+            },
           ],
           hidden: false,
         },
@@ -148,7 +155,6 @@ export const AdminSystem = (admin: any) => {
               icon: <DotIcon color="white" size={20} />,
             },
           ],
-
         },
 
         {

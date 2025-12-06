@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { CloseIcon } from "@/assets/icons";
 import InputPrimary from "@/components/UI/Input/InputPrimary";
@@ -10,7 +9,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Form, Input, Select, message, DatePicker, Modal } from "antd";
 import { useForm } from "antd/es/form/Form";
 import React, { useCallback, useState } from "react";
-import { CustomTable } from "../../learning-management/check-list/ExamList";
+import { CustomTable } from "../check-list/ExamList";
 import { debounce } from "lodash";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -28,7 +27,7 @@ interface Student {
   studentId: number;
 }
 
-const StudentList: React.FC = () => {
+const StatisticsLearningProcess: React.FC = () => {
   const user: User = useSelector((state: RootState) => state.admin);
   const router = useRouter();
 
@@ -55,7 +54,7 @@ const StudentList: React.FC = () => {
   const [selectedSchool, setSelectedSchool] = useState<number | null>(null);
 
   const navigateToStudentLearningProcess = (studentId: number) => {
-    router.push(`/student-learning-process/${studentId}`);
+    router.push(`/learning-management/statistics/${studentId}`);
   };
 
   // Fetching the list of classes
@@ -191,34 +190,6 @@ const StudentList: React.FC = () => {
     },
   });
 
-  //xác nhận xóa học sinh
-  const handleDeleteStudent = (record: Student) => {
-    Modal.confirm({
-      title: "Xác nhận xoá học sinh",
-      content: "Bạn có chắc chắn muốn xoá học sinh này không?",
-      okText: "Xoá",
-      okType: "danger",
-      cancelText: "Hủy",
-      onOk: async () => {
-        try {
-          await User.deleteUser(record.studentId); // record.id là id của học sinh
-          // Nếu thành công thì mới cập nhật lại danh sách ở FE
-          setLstStudents((prev) =>
-            prev.filter((student) => student.studentId !== record.studentId),
-          );
-          setFilteredLstStudents((prev) =>
-            prev.filter((student) => student.studentId !== record.studentId),
-          );
-
-          message.success("Xóa học sinh thành công");
-        } catch (error) {
-          console.error(error);
-          message.error("Xóa học sinh thất bại");
-        }
-      },
-    });
-  };
-
   const columns = [
     {
       title: "STT", // Index
@@ -235,7 +206,7 @@ const StudentList: React.FC = () => {
       // render: (value: string, record: Student) => (
       //   <div
       //     className="cursor-pointer text-lg text-blue-600 hover:underline"
-      //     //onClick={() => navigateToStudentLearningProcess(record.studentId)}
+      //     onClick={() => navigateToStudentLearningProcess(record.studentId)}
       //   >
       //     {value}
       //   </div>
@@ -299,55 +270,6 @@ const StudentList: React.FC = () => {
       ),
       width: 200,
     },
-    ["ADMIN", "TEACHER"].includes(user?.role)
-      ? {
-          title: "Hành động", // Actions
-          key: "actions",
-          render: (_: any, record: Student) => (
-            <div className="flex space-x-2">
-              <Button
-                icon={<EditOutlined />}
-                onClick={() => {
-                  setCurrentStudentId(record.studentId);
-                  const birthDay =
-                    record.studentProfile.birthDay &&
-                    record.studentProfile.birthDay !== "Không có"
-                      ? dayjs(record.studentProfile.birthDay)
-                      : null;
-
-                  form.setFieldsValue({
-                    name: record.name,
-                    // classroom: record.classroom,
-                    email: record.studentProfile.email || "",
-                    phoneNumber: record.studentProfile.phoneNumber || "",
-                    classroom: allClasses?.find(
-                      (c: { label: any }) => c.label === record.classroom,
-                    )?.value,
-                    school:
-                      record.studentProfile.schoolId ||
-                      allSchools?.find(
-                        (s: { label: any }) =>
-                          s.label === record.studentProfile.schoolName,
-                      )?.value,
-                    birthDay: birthDay,
-                    address: record.studentProfile.address,
-                    studentId: record.studentId,
-                  });
-                  setModalCreate({
-                    open: true,
-                    typeModal: "edit",
-                  });
-                }}
-              />
-              <Button
-                icon={<DeleteOutlined />}
-                danger
-                onClick={async () => handleDeleteStudent(record)}
-              />
-            </div>
-          ),
-        }
-      : null,
   ]?.filter((item) => item);
 
   const handleSearch = useCallback(
@@ -385,7 +307,7 @@ const StudentList: React.FC = () => {
           }}
         />
         {/* Show filters only for ADMIN users */}
-        {user?.role === "ADMIN" && (
+        {["ADMIN", "TEACHER"].includes(user?.role) && (
           <>
             <Select
               options={allClasses}
@@ -411,24 +333,19 @@ const StudentList: React.FC = () => {
             />
           </>
         )}
-
-        <Button
-          hidden={!(user?.role === "ADMIN" || user?.role === "TEACHER")}
-          type="primary"
-          style={{ background: "#2f54eb" }}
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setModalCreate({ ...modalCreate, open: true, typeModal: "create" });
-            form.resetFields();
-          }}
-        >
-          Thêm mới
-        </Button>
       </div>
       <CustomTable
         columns={columns as any}
         dataSource={filteredLstStudents}
         loading={isLoading}
+        onRow={(record: any) => {
+          return {
+            onClick: () => {
+              navigateToStudentLearningProcess(record.studentId);
+            },
+            className: "cursor-pointer hover:bg-gray-50", // Thêm style gợi ý có thể nhấp (optional)
+          };
+        }}
         pagination={{
           pageSize: pageSize,
           current: currentPage,
@@ -438,169 +355,8 @@ const StudentList: React.FC = () => {
           position: ["bottomCenter"],
         }}
       />
-
-      {/* Thêm học sinh */}
-      <BasicDrawer
-        width={460}
-        title={
-          modalCreate.typeModal === "create"
-            ? "Thêm mới học sinh"
-            : "Chỉnh sửa học sinh"
-        }
-        onClose={() => {
-          setModalCreate({ ...modalCreate, open: false });
-          form.resetFields();
-        }}
-        open={modalCreate.open}
-        destroyOnClose
-        onOk={() => {
-          form.submit();
-        }}
-        maskClosable={false}
-        extra={
-          <div className="flex items-center gap-x-4">
-            <Button
-              className="hover:opacity-60 "
-              onClick={() => {
-                setModalCreate({ ...modalCreate, open: false });
-                form.resetFields();
-              }}
-              type="link"
-              style={{ padding: 0 }}
-            >
-              <CloseIcon size={20} />
-            </Button>
-          </div>
-        }
-      >
-        <div className="">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={(value) => {
-              mutationCreateUpdate.mutate({
-                ...value,
-                name: value.name,
-                classroom: value.classroom,
-                classRoomName:
-                  allClasses?.find(
-                    (cls: { value: number }) => cls.value === value.classroom,
-                  )?.label || "",
-                school: value.school,
-                schoolName:
-                  allSchools?.find(
-                    (sch: { value: number }) => sch.value === value.school,
-                  )?.label || "",
-                studentId: currentStudentId,
-                birthDay: value.birthDay
-                  ? value.birthDay.format("YYYY-MM-DD")
-                  : null,
-                email: value.email,
-                phoneNumber: value.phoneNumber,
-              });
-            }}
-          >
-            <Form.Item
-              name="name"
-              label="Tên học sinh"
-              className="mb-2"
-              required
-              rules={[validateRequireInput("Tên học sinh không được bỏ trống")]}
-            >
-              <Input placeholder="Nhập tên học sinh" />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="email"
-              className="mb-2"
-              required
-              rules={[
-                { required: true, message: "Email không được bỏ trống" },
-                { type: "email", message: "Định dạng email không hợp lệ" },
-              ]}
-            >
-              <Input placeholder="Nhập email của phụ huynh" />
-            </Form.Item>
-            <Form.Item
-              name="phoneNumber"
-              label="Số điện thoại"
-              className="mb-2"
-              required
-              rules={[
-                validateRequireInput("Số điện thoại không được bỏ trống"),
-                {
-                  pattern: /^(0)[0-9]{9}$/,
-                  message:
-                    "Số điện thoại không hợp lệ (phải có 10 số và bắt đầu bằng 0)",
-                },
-              ]}
-            >
-              <Input placeholder="Nhập số điện thoại Phụ huynh" />
-            </Form.Item>
-            <Form.Item
-              name="school"
-              label="Trường"
-              className="mb-2"
-              required
-              rules={[validateRequireInput("Trường không được bỏ trống")]}
-            >
-              <Select
-                options={allSchools || []}
-                placeholder="Lựa chọn trường"
-                loading={isFetchingSchools}
-                allowClear
-                showSearch
-                optionFilterProp="label"
-              />
-            </Form.Item>
-            {/* lớp chỉ hiển thị sau khi chọn trường */}
-            <Form.Item
-              noStyle
-              shouldUpdate={(prev, current) => prev.school !== current.school}
-            >
-              {({ getFieldValue }) =>
-                getFieldValue("school") ? (
-                  <Form.Item
-                    name="classroom"
-                    label="Lớp"
-                    className="mb-2"
-                    required
-                    rules={[
-                      { required: true, message: "Lớp không được bỏ trống" },
-                    ]}
-                  >
-                    <Select
-                      options={allClasses || []}
-                      placeholder="Lựa chọn lớp"
-                      loading={isFetchingClasses}
-                      allowClear
-                      showSearch
-                      optionFilterProp="label"
-                    />
-                  </Form.Item>
-                ) : null
-              }
-            </Form.Item>
-
-            {/* <Form.Item
-              name="birthDay"
-              label="Ngày sinh"
-              className="mb-2"
-            >
-              <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item
-              name="address"
-              label="Địa chỉ"
-              className="mb-2"
-            >
-              <Input placeholder="Nhập địa chỉ" />
-            </Form.Item> */}
-          </Form>
-        </div>
-      </BasicDrawer>
     </div>
   );
 };
 
-export default StudentList;
+export default StatisticsLearningProcess;
